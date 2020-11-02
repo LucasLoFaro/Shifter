@@ -1,38 +1,39 @@
  #include <Servo.h>
-
+ #include <SoftwareSerial.h>
+ 
  //
  //Wiring
  //
 
  //Motors
- const int Motor1Positive = 1;   //L298N IN1
- const int Motor1Negative = 2;   //L298N IN2
- const int Motor2Positive = 3;   //L298N IN3
- const int Motor2Negative = 4;   //L298N IN4
- const int ServoReversePin = 5;
+ const int Motor1Positive = 13;   //L298N IN1
+ const int Motor1Negative = 12;   //L298N IN2
+ const int Motor2Positive = 11;   //L298N IN3
+ const int Motor2Negative = 10;   //L298N IN4
+ const int ServoReversePin = 2;
 
  //End-Stops
- const int Motor1LeftEndStop = 6;
- const int Motor1MiddleEndStop = 7;
- const int Motor1RightEndStop = 8;
- const int Motor2LeftEndStop = 9;
- const int Motor2MiddleEndStop = 10;
- const int Motor2RightEndStop = 11;
+ const int Motor1LeftEndStop = 9;
+ const int Motor1MiddleEndStop = 8;
+ const int Motor1RightEndStop = 7;
+ const int Motor2LeftEndStop = 5;
+ const int Motor2MiddleEndStop = 4;
+ const int Motor2RightEndStop = 3;
 
  //Push Buttons
- const int ShifterUp = 12;
- const int ShifterDown = 13;
- const int Clutch = 14;
+ const int ShifterUp = 22;
+ const int ShifterDown = 24;
+ const int Clutch = 26;
 
  //Screen
- const int ReverseGearLed = 15; //Blue
- const int NeutralGearLed = 16; //White
- const int FirstGearLed = 17;   //Green
- const int SecondGearLed = 18;  //Green
- const int ThirdGearLed = 19;   //Green
- const int FourthGearLed = 20;  //Green
- const int ErrorLed = 21;       //Red
- const int ClutchLed = 22;      //Green
+ const int ReverseGearLed = 31; //Blue
+ const int NeutralGearLed = 33; //White
+ const int FirstGearLed = 35;   //Green
+ const int SecondGearLed = 37;  //Green
+ const int ThirdGearLed = 39;   //Green
+ const int FourthGearLed = 41;  //Green
+ const int ErrorLed = 43;       //Red
+ const int ClutchLed = 45;      //Green
 
 
  //Variables
@@ -71,6 +72,12 @@ void setup() {
  pinMode (FourthGearLed, OUTPUT);
  pinMode (ErrorLed, OUTPUT);
  pinMode (ClutchLed, OUTPUT);
+
+
+ Serial.begin(9600);
+  while (!Serial) {
+    ; // wait for serial port to connect. Needed for native USB port only
+  }
 }
 
 
@@ -164,6 +171,8 @@ void CheckCurrentGear(){
 }
 
 void SetScreen(char gear){
+  Serial.println(gear);
+  
   switch (gear){
     case 'R':{
       digitalWrite(ReverseGearLed,HIGH);
@@ -235,6 +244,7 @@ void SetScreen(char gear){
 //Actions
 //
 void ShiftUp(){
+  Serial.println("Shift UP");
   WaitForClutchPushed();
 
   switch(CurrentGear){
@@ -252,6 +262,7 @@ void ShiftUp(){
 }
 
 void ShiftDown(){
+  Serial.println("Shift Down");
   WaitForClutchPushed();
 
   switch(CurrentGear){
@@ -270,9 +281,11 @@ void ShiftDown(){
 
 void WaitForClutchPushed(){
   while(digitalRead(Clutch)){
+    Serial.println("Press clutch");
     digitalWrite(ClutchLed,HIGH);
     delay(50);
   }
+  Serial.println("Clutch pressed.");
   digitalWrite(ClutchLed,LOW);
 }
 
@@ -370,10 +383,10 @@ void ReverseMiddle(){
 void loop() {
   CheckCurrentGear();
 
-  if(digitalRead(ShifterUp==HIGH))
+  if(digitalRead(ShifterUp)==HIGH)
     ShiftUp();
 
-  if(digitalRead(ShifterDown==HIGH))
+  if(digitalRead(ShifterDown)==HIGH)
     ShiftDown();
   
   delay(50);
